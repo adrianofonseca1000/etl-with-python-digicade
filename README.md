@@ -41,6 +41,56 @@ Observações:
 - A tabela deverá ser limpa antes de ser carregada;
 - O arquivo CSV poderá ter milhares de linhas, desta forma, dê COMMIT a cada 1000 registros inseridos.
 
+# ATIVIDADE_1_2_modelagem_script_teste_banco_digicade.sql
+
+use digicade;
+
+create table CLIENTE
+(
+   ID_CLIENTE           int not null,
+   CPF_CLIENTE          varchar(11)
+);
+
+alter table CLIENTE
+   add primary key (ID_CLIENTE);
+   
+alter table CLIENTE
+   change ID_CLIENTE ID_CLIENTE int not null auto_increment;
+
+create table OCORRENCIA
+(
+   ID_OCORRENCIA        int not null,
+   ID_CLIENTE           int not null,
+   DT_OCORRENCIA        datetime,
+   DSC_OCORRENCIA       varchar(100),
+   LONGITUDE            numeric (14, 11),
+   LATITUDE             numeric (14, 11)
+);
+
+alter table OCORRENCIA
+   add primary key (ID_OCORRENCIA, ID_CLIENTE);
+
+alter table OCORRENCIA
+   add unique AK_Key_2 (ID_CLIENTE);
+   
+alter table OCORRENCIA
+   add unique AK_Key_3 (DT_OCORRENCIA);
+   
+alter table OCORRENCIA
+   change ID_OCORRENCIA ID_OCORRENCIA int not null auto_increment;
+
+alter table OCORRENCIA add constraint FK_Cliente_Ocorrencia_FK foreign key (ID_CLIENTE)
+      references CLIENTE (ID_CLIENTE);
+
+create table STG_OCORRENCIAS
+(
+   CPF_CLIENTE          varchar(11),
+   DATA_HORA            datetime,
+   DESCRICAO            varchar(100),
+   LONGITUDE            numeric (14, 11),
+   LATITUDE             numeric (14, 11)
+);
+
 2- A tabela “STG_OCORRENCIAS”, que foi carregada na questão anterior, agora servirá de base para atualizar a tabela definitiva, que se chama “OCORRENCIA”. 
 
 - Campos da tabela “OCORRENCIA”:
@@ -72,4 +122,31 @@ Regras e filtros:
 - Retornar somente as ocorrências que estejam dentro do retângulo delimitado entre as longitudes -44.15 e -43.82, e as latitudes -20.23 e -19.91;
 - Retornar somente um registro para cada cliente, o registro retornado deverá ser o que tenha a maior data de ocorrência, ou seja, a última ocorrência do cliente.
 
+# ATIVIDADE_3_consulta.sql
 
+3 – Elaborar uma consulta SQL utilizando as tabelas “OCORRENCIA” e “CLIENTE”, que retorne as seguintes informações:
+
+- CPF do cliente;
+- Data da última ocorrência do cliente;
+- Descrição da última ocorrência do cliente;
+- Longitude e latitude da última ocorrência do cliente.
+
+Regras e filtros:
+- Retornar somente as ocorrências que estejam dentro do retângulo delimitado entre as longitudes -44.15 e -43.82, e as latitudes -20.23 e -19.91;
+- Retornar somente um registro para cada cliente, o registro retornado deverá ser o que tenha a maior data de ocorrência, ou seja, a última ocorrência do cliente.
+
+
+SELECT 
+    dc.CPF_CLIENTE,
+    MAX(dio.DT_OCORRENCIA),
+    dio.DSC_OCORRENCIA,
+    dio.LONGITUDE,
+    dio.LATITUDE
+FROM
+    digicade.cliente dc
+        INNER JOIN
+    digicade.ocorrencia dio ON (dio.ID_CLIENTE = dc.ID_CLIENTE)
+WHERE
+    dio.LONGITUDE BETWEEN '-44.15' AND '-43.82'
+        AND LATITUDE BETWEEN '-20.23' AND '-19.91'
+GROUP BY CPF_CLIENTE;
